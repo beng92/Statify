@@ -53,49 +53,7 @@ class SpotifyStats:
                 max = d[item]
                 name = item
         return (name,max)
-
-    def reduce_range(self, list):
-        sel1 = input("  1. All time\n  2. Set start date and time\n  3. Set end date and time\n  4. Set both start and end\n> ")
-        start = datetime.datetime.strptime("01/01/00 00:00:00", "%d/%m/%y %H:%M:%S")
-        end = datetime.datetime.now()
-        
-        if(sel1 == "1"):
-            return list
-        if(sel1 == "2" or sel1 == "4"):
-            print("\nEnter start date and time\n")
-            startdate = input("Enter date (dd/mm/yy): ")
-            starttime = input("Enter time (hh:mm:ss): ")
-            if startdate == "today" or startdate == "":
-                startdate = datetime.datetime.strftime(datetime.date.today(), "%d/%m/%y")
-            if starttime == "now"or starttime == "":
-                starttime = datetime.datetime.strftime(datetime.datetime.now(), "%H:%M:%S")
-            try:
-                start = datetime.datetime.strptime(startdate + " " + starttime, "%d/%m/%y %H:%M:%S")
-            except:
-                print("Error")
-                
-        if(sel1 == "3" or sel1 == "4"):
-            print("\nEnter end date and time\n")
-            enddate = input("Enter date (dd/mm/yy): ")
-            endtime = input("Enter time (hh:mm:ss): ")
-            if enddate == "today" or enddate == "":
-                enddate = datetime.datetime.strftime(datetime.date.today(), "%d/%m/%y")
-            if endtime == "now" or endtime == "":
-                endtime = datetime.datetime.strftime(datetime.datetime.now(), "%H:%M:%S")
-            try:
-                end = datetime.datetime.strptime(enddate + " " + endtime, "%d/%m/%y %H:%M:%S")
-            except:
-                print("Error")
-            
-        if len(list[0]) == 2:
-            result = [(d,s) for d,s in list if d >= start and d <= end]
-        elif len(list[0]) == 3:
-            result = [(d,a,t) for d,a,t in list if d >= start and d <= end]
-        else: 
-            return None
-        return result
-        
-        
+    
     def most_common_artist_plays(self, list):
         return self.most_common([a for d,a,t in list])
         
@@ -116,16 +74,6 @@ class SpotifyStats:
             timer = timer + (datetime.datetime.now() - start)
         return timer
                 
-
-    # http://stackoverflow.com/questions/8906926/formatting-python-timedelta-objects
-    def strfdelta(self, tdelta, fmt):
-        d = {"days": tdelta.days}
-        d["hours"], rem = divmod(tdelta.seconds, 3600)
-        d["minutes"], d["seconds"] = divmod(rem, 60)
-        return fmt.format(**d)
-
-
-
     def load(self, start, end):
         file = open("data/SpotifyStats.txt")
         lines = file.read().splitlines()
@@ -142,7 +90,8 @@ class SpotifyStats:
                 self.firstdate = date
             self.enddate = date
             song = line.split('>',1)[1]
-            if song != "Spotify" and song != "":
+            index = lines.index(line)
+            if song != "Spotify" and song != "" and index+1 < len(lines) and lines[index+1].split(">",1)[1] != "Spotify":
                 artistName = song.split(" - ",1)[0]
                 songName = song.split(" - ",1)[1]
                 self.allSongs.append((date, artistName, songName))
