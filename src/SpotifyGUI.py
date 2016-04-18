@@ -1,39 +1,48 @@
 from tkinter import *
-from SpotifyStats2 import *
-from ttkcalendar import *
-from CalendarDialog import *
+from SpotifyStats import *
+from libs.ttkcalendar import *
+from libs.CalendarDialog import *
 
-class SpotifyGUI2:
+class SpotifyGUI:
     def __init__(self):
 
         root = Tk()
         ss = SpotifyStats()
         
+        topFrame = Frame(root)
         mainFrame = Frame(root)
         bottomFrame = Frame(root)
         labels = {}
-        #http://effbot.org/zone/wcklib-calendar.htm
-        #http://svn.python.org/projects/sandbox/trunk/ttk-gsoc/samples/ttkcalendar.py
-        
+
+        ss.load(None, None)
+        global startdate, enddate
         startdate = ss.firstdate
         enddate = ss.enddate
         
+        startL = Label(topFrame,text=startdate)
+        endL = Label(topFrame,text=enddate)
         
         def startcal():
+            global startdate
             startdate = CalendarDialog(root).result
+            startL.config(text=startdate)
         def endcal():
+            global enddate
             enddate = CalendarDialog(root).result
+            endL.config(text=enddate)
+            
 
-        startB = Tkinter.Button(root, text="Start", command=startcal)
-        endB = Tkinter.Button(root, text="End", command=endcal)
-        startB.pack()
-        endB.pack()
+        startB = Tkinter.Button(topFrame, text="Start", command=startcal)
+        endB = Tkinter.Button(topFrame, text="End", command=endcal)
+        startB.pack(side=LEFT)
+        startL.pack(side=LEFT)
+        endB.pack(side=LEFT)
+        endL.pack(side=LEFT)
         
         
         
-        def reload():
-            ss.load()
-            ss.range(startdate, enddate)
+        def reload(): 
+            ss.load(startdate, enddate)
             labels["1. Plays"] = ss.plays()
             labels["2. Unique Songs"] = ss.uniquePlays()
             labels["3. Artists"] = ss.artists()
@@ -42,6 +51,8 @@ class SpotifyGUI2:
             labels["6. Listening Time"] = ss.listenTime()
         
             count = 0
+            for child in mainFrame.winfo_children():
+                child.destroy()
             for a in sorted(labels.keys()):
                 left = Label(mainFrame,text=a)
                 right = Label(mainFrame, text=labels[a])
@@ -49,6 +60,7 @@ class SpotifyGUI2:
                 right.grid(column=1, row=count, sticky=W)
                 count += 1
         
+        topFrame.pack()
         mainFrame.pack()
         bottomFrame.pack()
         reloadB = Button(bottomFrame, text="Reload", command=reload)
@@ -57,4 +69,4 @@ class SpotifyGUI2:
         root.mainloop()
         
 
-SpotifyGUI2()
+SpotifyGUI()

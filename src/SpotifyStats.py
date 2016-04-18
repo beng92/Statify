@@ -23,6 +23,8 @@ http://spotipy.readthedocs.org/en/latest/
 http://cgbystrom.com/articles/deconstructing-spotifys-builtin-http-server/
 https://github.com/cgbystrom/spotify-local-http-api/issues/2
 https://github.com/cgbystrom/spotify-local-http-api
+http://effbot.org/zone/wcklib-calendar.htm
+http://svn.python.org/projects/sandbox/trunk/ttk-gsoc/samples/ttkcalendar.py
 '''
 
 import time, datetime, spotipy
@@ -124,8 +126,8 @@ class SpotifyStats:
 
 
 
-    def load(self):
-        file = open("SpotifyStats.txt")
+    def load(self, start, end):
+        file = open("data/SpotifyStats.txt")
         lines = file.read().splitlines()
         file.close()
 
@@ -146,13 +148,11 @@ class SpotifyStats:
                 self.allSongs.append((date, artistName, songName))
             if song != "":
                 self.allItems.append((date,song))
+        if start != None and end != None:
+            self.allSongs = [(d,a,t) for d,a,t in self.allSongs if d >= start and d <= end]
+            self.allItems = [(d,s) for d,s in self.allItems if d >= start and d <= end]
         return "Loaded songs."
 
-        
-    def range(self, start, end):
-        print(start)
-        self.allSongs = [(d,a,t) for d,a,t in list if d >= start and d <= end]
-        self.allItems = [(d,s) for d,s in list if d >= start and d <= end]
         
     def plays(self):
         return str(len(self.allSongs)) #reduce_range(self.allSongs))))

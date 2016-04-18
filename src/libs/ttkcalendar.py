@@ -4,14 +4,11 @@ classes.
 """
 import calendar
 
-try:
-    import Tkinter
-    import tkFont
-except ImportError: # py3k
-    import tkinter as Tkinter
-    import tkinter.font as tkFont
 
-import ttk
+import tkinter as Tkinter
+import tkinter.font as tkFont
+
+import libs.ttk as ttk
 
 def get_calendar(locale, fwday):
     # instantiate proper calendar class
