@@ -222,7 +222,7 @@ class Calendar(ttk.Frame):
 def test():
     import sys
     root = Tkinter.Tk()
-    root.title('Ttk Calendar')
+    root.title('Calendar')
     ttkcal = Calendar(firstweekday=calendar.SUNDAY)
     ttkcal.pack(expand=1, fill='both')
 

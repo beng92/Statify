@@ -91,7 +91,7 @@ class SpotifyStats:
             self.enddate = date
             song = line.split('>',1)[1]
             index = lines.index(line)
-            if song != "Spotify" and song != "" and index+1 < len(lines) and lines[index+1].split(">",1)[1] != "Spotify":
+            if song != "Spotify" and song != "" and index+2 < len(lines) and not (lines[index+1].split(">",1)[1] == "Spotify" and lines[index+2].split(">",1)[1] == song):
                 artistName = song.split(" - ",1)[0]
                 songName = song.split(" - ",1)[1]
                 self.allSongs.append((date, artistName, songName))
@@ -104,14 +104,14 @@ class SpotifyStats:
 
         
     def plays(self):
-        return str(len(self.allSongs)) #reduce_range(self.allSongs))))
+        return str(len(self.allSongs))
     def artists(self):
         return str(len(set([a for d,a,t in self.allSongs])))
     def uniquePlays(self):
         return str(len(set([(a,t) for d,a,t in self.allSongs])))
     def mcSong(self):
         results = self.most_common_song_plays(self.allSongs)
-        return results[0][0] + " - " + results[0][1] + " (" + str(results[1]) + ")"
+        return " - ".join(results[0]) + " (" + str(results[1]) + ")"
     def mcArtist(self):
         results = self.most_common_artist_plays(self.allSongs)
         return results[0] + " (" + str(results[1]) + ")"
