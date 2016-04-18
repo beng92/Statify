@@ -2,6 +2,8 @@ from tkinter import *
 from SpotifyStats import *
 from libs.ttkcalendar import *
 from libs.CalendarDialog import *
+from urllib import *
+import webbrowser
 
 class SpotifyGUI:
     def __init__(self):
@@ -12,12 +14,13 @@ class SpotifyGUI:
         topFrame = Frame(root)
         mainFrame = Frame(root)
         bottomFrame = Frame(root)
-        labels = {}
+        
 
         ss.load(None, None)
-        global startdate, enddate
+        global startdate, enddate, labels
         startdate = ss.firstdate
         enddate = ss.enddate
+        labels = {}
         
         startL = Label(topFrame,text=startdate)
         endL = Label(topFrame,text=enddate)
@@ -40,26 +43,54 @@ class SpotifyGUI:
         endL.pack(side=LEFT)
         
         
-        
+        def return_new_string(string):
+            new_string = string.upper()
+            return new_string
+            
         def reload(): 
             ss.load(startdate, enddate)
-            labels["1. Plays"] = ss.plays()
-            labels["2. Unique Songs"] = ss.uniquePlays()
-            labels["3. Artists"] = ss.artists()
-            labels["4. Most Common Track"] = ss.mcSong()
-            labels["5. Most Common Artist"] = ss.mcArtist()
-            labels["6. Listening Time"] = ss.listenTime()
-        
-            count = 0
+            
             for child in mainFrame.winfo_children():
                 child.destroy()
-            for a in sorted(labels.keys()):
-                left = Label(mainFrame,text=a)
-                right = Label(mainFrame, text=labels[a])
-                left.grid(column=0, row=count, sticky=W)
-                right.grid(column=1, row=count, sticky=W)
-                count += 1
+                
+            row = 0
+            l1 = Label(mainFrame,text="1. Plays")
+            r1 = Label(mainFrame,text=ss.plays())
+            l1.grid(column=0, row=row, sticky=W)
+            r1.grid(column=1, row=row, sticky=W)
+            row += 1
+            
+            l2 = Label(mainFrame,text="2. Unique Songs")
+            r2 = Label(mainFrame,text=ss.uniquePlays())
+            l2.grid(column=0, row=row, sticky=W)
+            r2.grid(column=1, row=row, sticky=W)
+            row += 1
+            
+            l3 = Label(mainFrame,text="3. Artists")
+            r3 = Label(mainFrame,text=ss.artists())
+            l3.grid(column=0, row=row, sticky=W)
+            r3.grid(column=1, row=row, sticky=W)
+            row += 1
+            
+            l4 = Label(mainFrame,text="4. Most Common Track")
+            r4 = Button(mainFrame, text=ss.mcSong()[0], fg="blue", cursor="hand2", command=lambda: webbrowser.open_new(ss.mcSong()[1]))
+            l4.grid(column=0, row=row, sticky=W)
+            r4.grid(column=1, row=row, sticky=W)
+            row += 1
+            
+            l5 = Label(mainFrame,text="5. Most Common Artist")
+            r5 = Button(mainFrame, text=ss.mcArtist()[0], fg="blue", cursor="hand2", command=lambda: webbrowser.open_new(ss.mcArtist()[1]))
+            l5.grid(column=0, row=row, sticky=W)
+            r5.grid(column=1, row=row, sticky=W)
+            row += 1
+            
+            l6 = Label(mainFrame,text="6. Listening Time")
+            r6 = Label(mainFrame,text=ss.listenTime())
+            l6.grid(column=0, row=row, sticky=W)
+            r6.grid(column=1, row=row, sticky=W)
+            row += 1
         
+                   
         topFrame.pack()
         mainFrame.pack()
         bottomFrame.pack()

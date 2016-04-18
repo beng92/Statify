@@ -37,7 +37,7 @@ class SpotifyStats:
         self.allItems = []
         self.firstdate = None
         self.enddate = None
-        spotify = spotipy.Spotify()
+        self.spotify = spotipy.Spotify()
     
     def most_common(self, list):
         d = {}
@@ -57,9 +57,25 @@ class SpotifyStats:
     def most_common_artist_plays(self, list):
         return self.most_common([a for d,a,t in list])
         
+    def most_common_artist_link(self, artist):
+        try:
+            searchResult = self.spotify.search(q="artist:" + artist, limit=1,type='track')
+            url = str(searchResult['tracks']['items'][0]['artists'][0]['external_urls']['spotify'])
+            return url
+        except: 
+            return None
+        
     def most_common_song_plays(self, list):
         return self.most_common([(a,t) for d,a,t in list])
-
+        
+    def most_common_song_link(self, song):
+        try:
+            searchResult = self.spotify.search(q="artist:" + song[0] + " track:" + song[1], limit=1,type='track')
+            url = str(searchResult['tracks']['items'][0]['external_urls']['spotify'])
+            return url
+        except: 
+            return None
+    
     def listening_time(self, list): # Expecting self.allItems in form (d,s)
         timer = datetime.timedelta()
         start = None
@@ -111,10 +127,10 @@ class SpotifyStats:
         return str(len(set([(a,t) for d,a,t in self.allSongs])))
     def mcSong(self):
         results = self.most_common_song_plays(self.allSongs)
-        return " - ".join(results[0]) + " (" + str(results[1]) + ")"
+        return (" - ".join(results[0]) + " (" + str(results[1]) + ")", self.most_common_song_link(results[0]))
     def mcArtist(self):
         results = self.most_common_artist_plays(self.allSongs)
-        return results[0] + " (" + str(results[1]) + ")"
+        return (results[0] + " (" + str(results[1]) + ")", self.most_common_artist_link(results[0]))
     def listenTime(self):
         result = self.listening_time(self.allItems)
         days = int(result.days)
