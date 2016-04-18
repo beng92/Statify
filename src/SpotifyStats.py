@@ -75,7 +75,7 @@ class SpotifyStats:
         return timer
                 
     def load(self, start, end):
-        file = open("data/SpotifyStats.txt")
+        file = open("data/data.txt")
         lines = file.read().splitlines()
         file.close()
 
