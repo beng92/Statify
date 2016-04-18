@@ -18,7 +18,7 @@ class CalendarDialog(tkSimpleDialog.Dialog):
 
 class CalendarFrame(Tkinter.LabelFrame):
     def __init__(self, master):
-        Tkinter.LabelFrame.__init__(self, master, text="CalendarDialog Demo")
+        Tkinter.LabelFrame.__init__(self, master, text="CalendarDialog")
 
         def getdate():
             cd = CalendarDialog(self)
@@ -33,7 +33,7 @@ class CalendarFrame(Tkinter.LabelFrame):
 
 def main():
     root = Tkinter.Tk()
-    root.wm_title("CalendarDialog Demo")
+    root.wm_title("CalendarDialog")
     CalendarFrame(root).pack()
     root.mainloop()
 

@@ -27,12 +27,16 @@ class SpotifyGUI:
         
         def startcal():
             global startdate
-            startdate = CalendarDialog(root).result
-            startL.config(text=startdate)
+            result = CalendarDialog(root).result
+            if(result != None):
+                startdate = result
+                startL.config(text=startdate)
         def endcal():
             global enddate
-            enddate = CalendarDialog(root).result
-            endL.config(text=enddate)
+            result = CalendarDialog(root).result
+            if(result != None):
+                enddate = result
+                endL.config(text=enddate)
             
 
         startB = Tkinter.Button(topFrame, text="Start", command=startcal)
