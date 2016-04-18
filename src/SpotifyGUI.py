@@ -1,64 +1,60 @@
 from tkinter import *
-from SpotifyStats import *
+from SpotifyStats2 import *
+from ttkcalendar import *
+from CalendarDialog import *
 
-class SpotifyGUI:
+class SpotifyGUI2:
     def __init__(self):
 
         root = Tk()
         ss = SpotifyStats()
         
-        leftFrame = Frame(root)
-        rightFrame = Frame(root)
+        mainFrame = Frame(root)
+        bottomFrame = Frame(root)
+        labels = {}
+        #http://effbot.org/zone/wcklib-calendar.htm
+        #http://svn.python.org/projects/sandbox/trunk/ttk-gsoc/samples/ttkcalendar.py
         
-        def write(function):
-            textBox.delete('1.0', END)
-            textBox.insert(INSERT, function())
-        
-            
-            
-        
-        scroll = Scrollbar(rightFrame)    
-        textBox = Text(rightFrame, height=16, width=60)
-        scroll.config(command=textBox.yview)
-        textBox.config(yscrollcommand=scroll.set)
+        startdate = ss.firstdate
+        enddate = ss.enddate
         
         
+        def startcal():
+            startdate = CalendarDialog(root).result
+        def endcal():
+            enddate = CalendarDialog(root).result
+
+        startB = Tkinter.Button(root, text="Start", command=startcal)
+        endB = Tkinter.Button(root, text="End", command=endcal)
+        startB.pack()
+        endB.pack()
         
-        playsB = Button(leftFrame, text="Plays", command=lambda: write(ss.plays))
-        artistsB = Button(leftFrame, text="Artists", command=lambda: write(ss.artists))
-        uplaysB = Button(leftFrame, text="Unique Plays", command=lambda: write(ss.uniquePlays))
-        mcsongB = Button(leftFrame, text="Most Common Song", command=lambda: write(ss.mcSong))
-        mcartistB = Button(leftFrame, text="Most Common Artist", command=lambda: write(ss.mcArtist))
-        listentimeB = Button(leftFrame, text="Listening Time", command=lambda: write(ss.listenTime))
-        reloadB = Button(leftFrame, text="Reload Data", command=lambda: write(ss.load))
-        buttons = [playsB, artistsB, uplaysB, mcsongB, mcartistB, listentimeB, reloadB]
         
-        rightFrame.pack(side=RIGHT)
-        leftFrame.pack(side=BOTTOM)
-        for b in buttons:
-            b.pack(fill=X, pady=5, padx=5)
-        textBox.pack(side=LEFT, fill=Y)
-        scroll.pack(side=RIGHT, fill=Y)
         
-        ss.load()
+        def reload():
+            ss.load()
+            ss.range(startdate, enddate)
+            labels["1. Plays"] = ss.plays()
+            labels["2. Unique Songs"] = ss.uniquePlays()
+            labels["3. Artists"] = ss.artists()
+            labels["4. Most Common Track"] = ss.mcSong()
+            labels["5. Most Common Artist"] = ss.mcArtist()
+            labels["6. Listening Time"] = ss.listenTime()
+        
+            count = 0
+            for a in sorted(labels.keys()):
+                left = Label(mainFrame,text=a)
+                right = Label(mainFrame, text=labels[a])
+                left.grid(column=0, row=count, sticky=W)
+                right.grid(column=1, row=count, sticky=W)
+                count += 1
+        
+        mainFrame.pack()
+        bottomFrame.pack()
+        reloadB = Button(bottomFrame, text="Reload", command=reload)
+        reloadB.pack()
+        reload()
         root.mainloop()
-'''
-        label = Label(veryTopFrame, text="Name:")
-        name = Entry(veryTopFrame)
-        text = Text(topFrame)
-        text.config(state=DISABLED)
-        entry = Entry(bottomFrame, text="Button 4",fg="purple")
-        #entry.bind('<Return>', write)
-        button = Button(bottomFrame, text="Send")
-        #button.bind('<Button-1>',write)
-
-        label.pack(side=LEFT)
-        name.pack(side=LEFT)
-        text.pack(side=LEFT)
-        button.pack(side=RIGHT)
-        entry.pack(side=BOTTOM)
-
         
-        '''
 
-SpotifyGUI()
+SpotifyGUI2()

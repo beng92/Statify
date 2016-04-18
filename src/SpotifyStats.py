@@ -33,6 +33,8 @@ class SpotifyStats:
     def __init__(self):
         self.allSongs = []
         self.allItems = []
+        self.firstdate = None
+        self.enddate = None
         spotify = spotipy.Spotify()
     
     def most_common(self, list):
@@ -92,33 +94,6 @@ class SpotifyStats:
         return result
         
         
-    def reduce_range_previous(self, list):
-        sel2 = input("  1. All time\n  2. Enter number of weeks\n  3. Enter number of days\n  4. Enter number of hours\n> ")
-        if(sel2 == "1"):
-            return list
-            
-        elif(sel2 == "2" or sel2 == "3" or sel2 == "4"):
-            start = datetime.datetime.now()
-            end = datetime.datetime.now()
-            if(sel2 == "2"):
-                sel3 = input("Weeks = ")
-                start = start - datetime.timedelta(weeks=int(sel3))
-            if(sel2 == "3"):
-                sel3 = input("Days = ")
-                start = start - datetime.timedelta(days=int(sel3))
-            if(sel2 == "4"):
-                sel3 = input("Hours = ")
-                start = start - datetime.timedelta(hours=int(sel3))
-        
-        if len(list[0]) == 2:
-            result = [(d,s) for d,s in list if d >= start and d <= end]
-        elif len(list[0]) == 3:
-            result = [(d,a,t) for d,a,t in list if d >= start and d <= end]
-        else: 
-            return None
-        return result
-        
-        
     def most_common_artist_plays(self, list):
         return self.most_common([a for d,a,t in list])
         
@@ -156,10 +131,14 @@ class SpotifyStats:
 
         self.allSongs = []
         self.allItems = []
+        self.firstdate = None
 
         for line in lines:
             dateLine = line.split('>',1)[0]
             date = datetime.datetime.strptime(dateLine, "%a %b %d %H:%M:%S %Y")
+            if self.firstdate == None:
+                self.firstdate = date
+            self.enddate = date
             song = line.split('>',1)[1]
             if song != "Spotify" and song != "":
                 artistName = song.split(" - ",1)[0]
@@ -169,92 +148,28 @@ class SpotifyStats:
                 self.allItems.append((date,song))
         return "Loaded songs."
 
+        
+    def range(self, start, end):
+        print(start)
+        self.allSongs = [(d,a,t) for d,a,t in list if d >= start and d <= end]
+        self.allItems = [(d,s) for d,s in list if d >= start and d <= end]
+        
     def plays(self):
-        return "Number of songs: " + str(len(self.allSongs)) #reduce_range(self.allSongs))))
+        return str(len(self.allSongs)) #reduce_range(self.allSongs))))
     def artists(self):
-        return "Number of Artists: " + str(len(set([a for d,a,t in self.allSongs])))
+        return str(len(set([a for d,a,t in self.allSongs])))
     def uniquePlays(self):
-        return "Number of unique songs: " + str(len(set([(a,t) for d,a,t in self.allSongs])))
+        return str(len(set([(a,t) for d,a,t in self.allSongs])))
     def mcSong(self):
         results = self.most_common_song_plays(self.allSongs)
-        ret = "Favourite Song is {} with {} plays".format(' - '.join(results[0]), str(results[1]))
-        try:
-            searchResult = spotify.search(q="artist:" + results[0][0] + " track:" + results[0][1], limit=1,type='track')
-            url = str(searchResult['tracks']['items'][0]['external_urls']['spotify'])
-            ret = ret + "\n" + url
-        except: 
-            pass
-        return ret
-        
+        return results[0][0] + " - " + results[0][1] + " (" + str(results[1]) + ")"
     def mcArtist(self):
         results = self.most_common_artist_plays(self.allSongs)
-        ret = "Favourite Artist is {} with {} plays".format(results[0], str(results[1]))
-        try:
-            searchResult = spotify.search(q="artist:" + results[0], limit=1,type='track')
-            url = str(searchResult['tracks']['items'][0]['artists'][0]['external_urls']['spotify'])
-            ret = ret + "\n" + url
-        except: 
-            pass
-        return ret
-        
+        return results[0] + " (" + str(results[1]) + ")"
     def listenTime(self):
         result = self.listening_time(self.allItems)
         days = int(result.days)
         hours = int(result.seconds/3600)
         minutes = int(result.seconds/60)-(hours*60)
-        ret = "Listening time:" + str(days) + ("day" if result.days == 1 else "days") + str(hours) + ("hour" if hours == 1 else "hours") + str(minutes) + ("minute" if minutes == 1 else "minutes")
+        return str(days) + (" day, " if result.days == 1 else " days, ") + str(hours) + (" hour, " if hours == 1 else " hours, ") + str(minutes) + (" minute " if minutes == 1 else " minutes ")
         return ret
-
-'''
-while True:
-    print("\nWhich option would you like?")
-    print("  1. Number of Plays\n  2. Number of Unique Songs\n  3. Number of Artists\n  4. Most Common Track\n  5. Most Common Artist\n  6. Listening Time\n  7. Search R. Reload Data")
-    selection = input("> ")
-
-    if(selection == "1"):
-        print("\nNumber of songs: " + str(len(reduce_range(self.allSongs))))
-    
-    elif(selection == "2"):
-        print("\nNumber of unique songs: " + str(len(set([(a,t) for d,a,t in reduce_range(self.allSongs)]))))
-    
-    elif(selection == "3"):
-        print("\nNumber of Artists: " + str(len(set([a for d,a,t in reduce_range(self.allSongs)]))))
-
-    elif(selection == "4"):
-        results = most_common_song_plays(reduce_range(self.allSongs))
-        print("\nFavourite Song is {} with {} plays".format(' - '.join(results[0]), str(results[1])))
-        try:
-            searchResult = spotify.search(q="artist:" + results[0][0] + " track:" + results[0][1], limit=1,type='track')
-            url = str(searchResult['tracks']['items'][0]['external_urls']['spotify'])
-            print(url)
-        except: 
-            pass
-        
-    elif(selection == "5"):
-        results = most_common_artist_plays(reduce_range(self.allSongs))
-        print("\nFavourite Artist is {} with {} plays".format(results[0], str(results[1])))
-        try:
-            searchResult = spotify.search(q="artist:" + results[0], limit=1,type='track')
-            url = str(searchResult['tracks']['items'][0]['artists'][0]['external_urls']['spotify'])
-            print(url)
-        except: 
-            pass
-        
-    elif(selection == "6"):
-        result = listening_time(reduce_range(self.allItems))
-        days = int(result.days)
-        hours = int(result.seconds/3600)
-        minutes = int(result.seconds/60)-(hours*60)
-        print ("\nListening time:", str(days), "day" if result.days == 1 else "days", str(hours), "hour" if hours == 1 else "hours", str(minutes), "minute" if minutes == 1 else "minutes")
-        
-    elif(selection == "7"):
-        string = input("Enter Search String:\n> ")
-        
-        
-        
-    elif(selection == "R"):
-        load()
-    else:
-        print ("Error.\n> ")
-
-'''
