@@ -1,7 +1,7 @@
 import win32gui, time, os
 
 track = win32gui.GetWindowText(win32gui.FindWindow('SpotifyMainWindow', None))
-file = open('SpotifyStats.txt', 'a')
+file = open('data/data.txt', 'a')
 file.write(time.ctime() + ">" + track + '\n')
 file.flush()
 os.fsync(file.fileno())
