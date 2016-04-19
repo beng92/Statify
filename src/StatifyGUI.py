@@ -29,13 +29,13 @@ class StatifyGUI:
         
         def startcal():
             global startdate
-            result = DateTimeDialog(root).result
+            result = DateTimeDialog(root, "Set Start", "icons/statify.ico").result
             if(result != None):
                 startdate = result
                 startL.config(text=startdate)
         def endcal():
             global enddate
-            result = DateTimeDialog(root).result
+            result = DateTimeDialog(root, "Set End", "icons/statify.ico").result
             if(result != None):
                 enddate = result
                 endL.config(text=enddate)

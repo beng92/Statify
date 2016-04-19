@@ -3,13 +3,15 @@ import os
 
 class Dialog(Toplevel):
 
-    def __init__(self, parent, title = None):
+    def __init__(self, parent, title = None, icon = None):
 
         Toplevel.__init__(self, parent)
         self.transient(parent)
 
         if title:
             self.title(title)
+        if icon:
+            self.iconbitmap(icon)
 
         self.parent = parent
 
