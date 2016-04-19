@@ -12,7 +12,6 @@ while True:
     else:
         track = win32gui.GetWindowText(win32gui.FindWindow('SpotifyMainWindow', None))
         if (track != ""):
-            print("Adding track: ", track)
             file.write(time.ctime() + ">" + track + '\n')
             file.flush()
             os.fsync(file.fileno())
