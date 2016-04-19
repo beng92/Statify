@@ -1,15 +1,17 @@
 from tkinter import *
-from SpotifyStats import *
+from StatifyStats import *
 from libs.ttkcalendar import *
 from libs.DateTimeDialog import *
 from urllib import *
 import webbrowser
 
-class SpotifyGUI:
+class StatifyGUI:
     def __init__(self):
 
         root = Tk()
-        ss = SpotifyStats()
+        root.wm_title("Statify")
+        root.iconbitmap('icons/statify.ico')
+        ss = StatifyStats()
         
         topFrame = Frame(root)
         mainFrame = Frame(root)
@@ -104,4 +106,4 @@ class SpotifyGUI:
         root.mainloop()
         
 
-SpotifyGUI()
+StatifyGUI()

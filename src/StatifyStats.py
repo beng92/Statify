@@ -31,7 +31,7 @@ import time, datetime, spotipy
 
 # Songs read in order (date, artist, title)
 
-class SpotifyStats:
+class StatifyStats:
     def __init__(self):
         self.allSongs = []
         self.allItems = []
