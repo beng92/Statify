@@ -35,11 +35,12 @@ class Calendar(ttk.Frame):
         year = kw.pop('year', self.datetime.now().year)
         month = kw.pop('month', self.datetime.now().month)
         locale = kw.pop('locale', None)
-        sel_bg = kw.pop('selectbackground', '#ecffc4')
-        sel_fg = kw.pop('selectforeground', '#05640e')
+        sel_bg = kw.pop('selectbackground', '#338fff')
+        sel_fg = kw.pop('selectforeground', '#ffffff')
 
         self._date = self.datetime(year, month, 1)
         self._selection = None # no date selected
+        self._today = None # no date selected
 
         ttk.Frame.__init__(self, master, **kw)
 
@@ -215,9 +216,14 @@ class Calendar(ttk.Frame):
         """Return a datetime representing the current selected date."""
         if not self._selection:
             return None
-
         year, month = self._date.year, self._date.month
         return self.datetime(year, month, int(self._selection[0]))
+
+    @property
+    def today(self):
+        """Return a datetime representing the current date."""
+        year, month, day = self.datetime.now().year, self.datetime.now().month, self.datetime.now().day
+        return self.datetime(year, month, day)
 
 def test():
     import sys

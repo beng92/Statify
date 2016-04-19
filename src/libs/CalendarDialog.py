@@ -1,8 +1,7 @@
-import tkinter as Tkinter
-import libs.ttkcalendar as ttkcalendar
+import Tkinter
+import ttkcalendar
 
-import libs.tkSimpleDialog as tkSimpleDialog
-
+import tkSimpleDialog
 
 class CalendarDialog(tkSimpleDialog.Dialog):
     """Dialog box that displays a calendar and returns the selected date"""
@@ -14,28 +13,20 @@ class CalendarDialog(tkSimpleDialog.Dialog):
         self.result = self.calendar.selection
 
 # Demo code:
-
-
-class CalendarFrame(Tkinter.LabelFrame):
-    def __init__(self, master):
-        Tkinter.LabelFrame.__init__(self, master, text="CalendarDialog")
-
-        def getdate():
-            cd = CalendarDialog(self)
-            result = cd.result
-            self.selected_date.set(result.strftime("%m/%d/%Y"))
-
-        self.selected_date = Tkinter.StringVar()
-
-        Tkinter.Entry(self, textvariable=self.selected_date).pack(side=Tkinter.LEFT)
-        Tkinter.Button(self, text="Choose a date", command=getdate).pack(side=Tkinter.LEFT)
-
-
 def main():
     root = Tkinter.Tk()
-    root.wm_title("CalendarDialog")
-    CalendarFrame(root).pack()
+    root.wm_title("CalendarDialog Demo")
+
+    def onclick():
+        cd = CalendarDialog(root)
+        print cd.result
+
+    button = Tkinter.Button(root, text="Click me to see a calendar!", command=onclick)
+    button.pack()
+    root.update()
+
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()

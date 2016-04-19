@@ -1,7 +1,7 @@
 from tkinter import *
 from SpotifyStats import *
 from libs.ttkcalendar import *
-from libs.CalendarDialog import *
+from libs.DateTimeDialog import *
 from urllib import *
 import webbrowser
 
@@ -27,13 +27,13 @@ class SpotifyGUI:
         
         def startcal():
             global startdate
-            result = CalendarDialog(root).result
+            result = DateTimeDialog(root).result
             if(result != None):
                 startdate = result
                 startL.config(text=startdate)
         def endcal():
             global enddate
-            result = CalendarDialog(root).result
+            result = DateTimeDialog(root).result
             if(result != None):
                 enddate = result
                 endL.config(text=enddate)

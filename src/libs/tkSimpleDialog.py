@@ -50,6 +50,8 @@ class Dialog(Toplevel):
 
         box = Frame(self)
 
+        w = Button(box, text="Today", width=10, command=self.today)
+        w.pack(side=LEFT, padx=5, pady=5)
         w = Button(box, text="OK", width=10, command=self.ok, default=ACTIVE)
         w.pack(side=LEFT, padx=5, pady=5)
         w = Button(box, text="Cancel", width=10, command=self.cancel)
@@ -57,6 +59,7 @@ class Dialog(Toplevel):
 
         self.bind("<Return>", self.ok)
         self.bind("<Escape>", self.cancel)
+        
 
         box.pack()
 
@@ -82,6 +85,20 @@ class Dialog(Toplevel):
         self.parent.focus_set()
         self.destroy()
 
+    def today(self, event=None):
+
+        if not self.validate():
+            self.initial_focus.focus_set() # put focus back
+            return
+
+        self.withdraw()
+        self.update_idletasks()
+
+        self.settoday()
+
+        self.cancel()
+
+        
     #
     # command hooks
 
@@ -90,5 +107,9 @@ class Dialog(Toplevel):
         return 1 # override
 
     def apply(self):
+
+        pass # override
+        
+    def settoday(self):
 
         pass # override
