@@ -6,4 +6,3 @@ cd "C:\Users\Ben\Documents\SpotifyTracking\Statify\src"
 C:\Python33\pythonw.exe StatifyTracking.pyw
 
 exit
-exit

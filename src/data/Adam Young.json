@@ -1,0 +1,33 @@
+{
+  "external_urls" : {
+    "spotify" : "https://open.spotify.com/artist/2Dr744zaEbNqmW9jxw4gfq"
+  },
+  "followers" : {
+    "href" : null,
+    "total" : 4929
+  },
+  "genres" : [ ],
+  "href" : "https://api.spotify.com/v1/artists/2Dr744zaEbNqmW9jxw4gfq",
+  "id" : "2Dr744zaEbNqmW9jxw4gfq",
+  "images" : [ {
+    "height" : 1000,
+    "url" : "https://i.scdn.co/image/2081968c418007f0e8928e9e9edc9d17381209c6",
+    "width" : 1000
+  }, {
+    "height" : 640,
+    "url" : "https://i.scdn.co/image/c99c3d3078c792a78855cc7acefafc0e390ae2d5",
+    "width" : 640
+  }, {
+    "height" : 200,
+    "url" : "https://i.scdn.co/image/518dfdca41b63bd8e1587e40a93b8aaa5541fc7f",
+    "width" : 200
+  }, {
+    "height" : 64,
+    "url" : "https://i.scdn.co/image/e13474041ae6c62c568e16172da9715163ff762b",
+    "width" : 64
+  } ],
+  "name" : "Adam Young",
+  "popularity" : 48,
+  "type" : "artist",
+  "uri" : "spotify:artist:2Dr744zaEbNqmW9jxw4gfq"
+}
