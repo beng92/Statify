@@ -12,11 +12,11 @@ class StatifyCache:
         self.allAlbums  = self.root[2]
         
     def add(self, songid, artistid, albumid):
-        if(songid != None and not self.exists(id, "song")):
+        if(songid != None and not self.exists(songid, "any")):
             self._addSong(songid)
-        if(artistid != None and not self.exists(id, "artist")):
+        if(artistid != None and not self.exists(artistid, "any")):
             self._addArtist(artistid)
-        if(albumid != None and not self.exists(id, "album")):
+        if(albumid != None and not self.exists(albumid, "any")):
             self._addAlbum(albumid)
     
     def _addSong(self, id):
@@ -213,8 +213,8 @@ def test():
     sc = StatifyCache()
     #print(sc.exists("2ELcuwXrtMA8ect9cGTYnQ", "song")
     #sc.add("2ELcuwXrtMA8ect9cGTYnQ","2Dr744zaEbNqmW9jxw4gfq","2PqYzY7wdgq0ydlC3nR4ei")
-    print(sc.exists("2Dr744zaEbNqmW9jxw4gfq", "any"))
-    print(sc.exists("2Dr744zaEbNqsjxw4gfq", "any"))
-    print(sc.get("2PqYzY7wdgq0ydlC3nR4ei"))
-
+    #print(sc.exists("2Dr744zaEbNqmW9jxw4gfq", "any"))
+    #print(sc.exists("2Dr744zaEbNqsjxw4gfq", "any"))
+    #print(sc.get("2PqYzY7wdgq0ydlC3nR4ei"))
+    sc.add("asfasfag321tr3",None,None)
 test()
