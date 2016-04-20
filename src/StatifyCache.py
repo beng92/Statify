@@ -215,6 +215,5 @@ def test():
     #sc.add("2ELcuwXrtMA8ect9cGTYnQ","2Dr744zaEbNqmW9jxw4gfq","2PqYzY7wdgq0ydlC3nR4ei")
     #print(sc.exists("2Dr744zaEbNqmW9jxw4gfq", "any"))
     #print(sc.exists("2Dr744zaEbNqsjxw4gfq", "any"))
-    #print(sc.get("2PqYzY7wdgq0ydlC3nR4ei"))
-    sc.add("asfasfag321tr3",None,None)
-test()
+    #print(sc.get("2PqYzY7wdgq0ydlC3nR4ei").find('name').text)
+    
