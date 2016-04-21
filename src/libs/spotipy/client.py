@@ -4,7 +4,7 @@
 from __future__ import print_function
 import sys
 import base64
-import requests
+import libs.requests as requests
 import json
 import time
 

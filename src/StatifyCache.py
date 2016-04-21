@@ -1,4 +1,5 @@
-import spotipy, logging
+import libs.spotipy as spotipy
+import logging
 import xml.etree.ElementTree as ET
 import os.path
 
