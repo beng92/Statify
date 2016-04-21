@@ -44,6 +44,8 @@ class StatifyStats:
         self.cache()
         
     def cache(self):
+        """Re-cache's the new list. Called on reload.
+        """
         logging.info("Cache initiated")
         for (date, artist, title) in list(set(self.allSongs)):
             if not self.sc.existsSong(title, artist):
@@ -110,6 +112,8 @@ class StatifyStats:
         return timer
                 
     def load(self, start, end):
+        """Loads the data.txt file created by StatifyTracking.pyw
+        """
         file = open("data/data.txt")
         lines = file.read().splitlines()
         file.close()
@@ -140,18 +144,30 @@ class StatifyStats:
 
         
     def plays(self):
+        """Return total number of plays for the currently loaded list
+        """
         return str(len(self.allSongs))
     def artists(self):
+        """Return number of artists in the currently loaded list
+        """
         return str(len(set([a for d,a,t in self.allSongs])))
     def uniquePlays(self):
+        """Return the number of songs in the currently loaded list
+        """
         return str(len(set([(a,t) for d,a,t in self.allSongs])))
     def mcSong(self):
+        """Returns the most common song, with a link to the Spotify page.
+        """
         results = self.most_common_song_plays(self.allSongs)
         return (" - ".join(results[0]) + " (" + str(results[1]) + ")", self.most_common_song_link(results[0]))
     def mcArtist(self):
+        """Returns the most common artist, with a link to the Spotify page.
+        """
         results = self.most_common_artist_plays(self.allSongs)
         return (results[0] + " (" + str(results[1]) + ")", self.most_common_artist_link(results[0][1]))
     def listenTime(self):
+        """Returns the total listening time for the currently selected range.
+        """
         result = self.listening_time(self.allItems)
         days = int(result.days)
         hours = int(result.seconds/3600)

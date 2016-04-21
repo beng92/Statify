@@ -30,6 +30,8 @@ class StatifyGUI:
         endL = Label(topFrame,text=enddate)
         
         def startcal():
+            """Creates a datetime picker for the start of the range
+            """
             global startdate
             result = DateTimeDialog(root, "Set Start", "icons/statify.ico").result
             if(result != None):
@@ -37,6 +39,8 @@ class StatifyGUI:
                 startL.config(text=startdate)
                 logging.info("Set start date: " + str(startdate))
         def endcal():
+            """Creates a datetime picker for the end of the range.
+            """
             global enddate
             result = DateTimeDialog(root, "Set End", "icons/statify.ico").result
             if(result != None):
@@ -54,6 +58,8 @@ class StatifyGUI:
         
             
         def reload(): 
+            """Reload data and stats.
+            """
             ss.load(startdate, enddate)
             ss.cache()
             logging.info("Reloading")
