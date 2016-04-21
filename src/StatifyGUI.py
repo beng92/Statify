@@ -3,15 +3,16 @@ from StatifyStats import *
 from libs.ttkcalendar import *
 from libs.DateTimeDialog import *
 from urllib import *
-import webbrowser
+import webbrowser, logging
 
 class StatifyGUI:
     def __init__(self):
-
         root = Tk()
         root.wm_title("Statify")
         root.iconbitmap('icons/statify.ico')
+        logging.basicConfig(filename="debug.log", level=logging.DEBUG, format='%(asctime)s %(levelname)s > %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
         ss = StatifyStats()
+        
         
         topFrame = Frame(root)
         mainFrame = Frame(root)
@@ -19,6 +20,7 @@ class StatifyGUI:
         
 
         ss.load(None, None)
+        logging.info("Loaded songs")
         global startdate, enddate, labels
         startdate = ss.firstdate
         enddate = ss.enddate
@@ -33,12 +35,14 @@ class StatifyGUI:
             if(result != None):
                 startdate = result
                 startL.config(text=startdate)
+                logging.info("Set start date: " + str(startdate))
         def endcal():
             global enddate
             result = DateTimeDialog(root, "Set End", "icons/statify.ico").result
             if(result != None):
                 enddate = result
                 endL.config(text=enddate)
+                logging.info("Set end date: " + str(enddate))
             
 
         startB = Tkinter.Button(topFrame, text="Start", command=startcal)
@@ -48,13 +52,11 @@ class StatifyGUI:
         endB.pack(side=LEFT)
         endL.pack(side=LEFT)
         
-        
-        def return_new_string(string):
-            new_string = string.upper()
-            return new_string
             
         def reload(): 
             ss.load(startdate, enddate)
+            ss.cache()
+            logging.info("Reloading")
             
             for child in mainFrame.winfo_children():
                 child.destroy()

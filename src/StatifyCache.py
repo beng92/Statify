@@ -1,23 +1,43 @@
-import spotipy
+import spotipy, logging
 import xml.etree.ElementTree as ET
+import os.path
 
 
 class StatifyCache:
     def __init__(self):
         self.spotipy = spotipy.Spotify()
-        self.tree = ET.parse("data/cache.xml")
-        self.root = self.tree.getroot()
-        self.allSongs   = self.root[0]
-        self.allArtists = self.root[1]
-        self.allAlbums  = self.root[2]
+        logging.basicConfig(filename="debug.log", level=logging.DEBUG, format='%(asctime)s %(levelname)s > %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
         
-    def add(self, songid, artistid, albumid):
-        if(songid != None and not self.exists(songid, "any")):
-            self._addSong(songid)
-        if(artistid != None and not self.exists(artistid, "any")):
-            self._addArtist(artistid)
-        if(albumid != None and not self.exists(albumid, "any")):
-            self._addAlbum(albumid)
+        try:
+            self.tree = ET.parse("data/cache.xml")
+        except:
+            logging.warning("Could not parse cache file... Recreating.")
+            data    = ET.Element('root')
+            songs   = ET.SubElement(data, 'songs')
+            artists = ET.SubElement(data, 'artists')
+            albums  = ET.SubElement(data, 'albums')
+            ET.ElementTree(data).write("data/cache.xml")
+        self.tree = ET.parse("data/cache.xml")
+            
+        
+        self.root = self.tree.getroot()
+        self.allSongs   = self.root.find('songs')
+        self.allArtists = self.root.find('artists')
+        self.allAlbums  = self.root.find('albums')
+        
+    def add(self, id, type):
+        """Add a song to the cache file.
+        id is type spotify ID.
+        type should be song, artist or album.
+        """
+        if id == None or self.existsID(id, type):
+            return None
+        if(type == "song"):
+            return self._addSong(id)
+        if(type == "artist"):
+            return self._addArtist(id)
+        if(type == "album"):
+            return self._addAlbum(id)
     
     def _addSong(self, id):
         result = self.spotipy.track(id)
@@ -55,13 +75,16 @@ class StatifyCache:
         totaltracks = result['tracks']['total']
         return Album(self.tree, id, name, artist, artistid, albumurl, imageurl, tracks, totaltracks, duration)
     
-    def exists(self, id, type):
+    def existsID(self, id, type):
+        """Checks an id to see if it exists in the cache file
+        type should be song, artist or album or any.
+        """
         found = False
         if type == "song" or type == "any":
             for track in self.allSongs.findall('song'):
                 if track.find('id').text == id:
                     found = True 
-        if type == "artist"or type == "any":
+        if type == "artist" or type == "any":
             for artist in self.allArtists.findall('artist'):
                 if artist.find('id').text == id:
                     found = True
@@ -69,23 +92,68 @@ class StatifyCache:
             for album in self.allAlbums.findall('album'):
                 if album.find('id').text == id:
                     found = True
-        else:
-            return None
+        return found
+        
+    def existsSong(self, song, artist):
+        """Checks a song and artist name to see if it exists in the cache file
+        """
+        found = False
+        for track in self.allSongs.findall('song'):
+            if track.find('name').text == song and track.find('artist').text == artist:
+                found = True 
         return found
     
-    def get(self, id):
-        if self.exists(id, "any"):
+    def getID(self, id):
+        """Return the Song, Artist or Album object based on id, if it exists
+        """
+        if self.existsID(id, "any"):
             for track in self.allSongs.findall('song'):
                 if track.find('id').text == id:
-                    return track
+                    return Song.read(track)
             for artist in self.allArtists.findall('artist'):
                 if artist.find('id').text == id:
-                    return artist
+                    return Artist.read(artist)
             for album in self.allAlbums.findall('album'):
                 if album.find('id').text == id:
-                    return album
+                    return Album.read(album)
         else:
             return None
+            
+    def getName(self, name, type):
+        """Return the Song, Artist or Album object based on name, if it exists
+        type is either song, artist or album.
+        """
+        if type == "song":
+            for track in self.allSongs.findall('song'):
+                if track.find('name').text == name:
+                    ET.dump(track)
+                    return Song.read(track)
+        if type == "artist":
+            for artist in self.allArtists.findall('artist'):
+                if artist.find('name').text == name:
+                    return Artist.read(artist)
+        if type == "album":
+            for album in self.allAlbums.findall('album'):
+                if album.find('name').text == name:
+                    return Album.read(album)
+        return None
+            
+    def search(self, song, artist):
+        """Sends a search string to Spotify's servers to return an ID
+        Artist must not be None, song can be None
+        """
+        if song != None and artist != None:
+            result = self.spotipy.search(q="artist:" + artist + " track:" + song, limit=1, type='track')
+            if len(result['tracks']['items']) > 0:
+                return result['tracks']['items'][0]['id']
+            else:
+                return None
+        elif song == None and artist != None:
+            result = self.spotipy.search(q="artist:" + artist, limit=1, type='artist')
+            if len(result['artists']['items']) > 0:
+                return result['artists']['items'][0]['id']
+            else:
+                return None
             
 class Song: 
     def __init__(self, tree, id, name, songurl, artist, artistid, album, albumid, explicit, discno, trackno, duration):
@@ -101,11 +169,14 @@ class Song:
         self.trackno = trackno
         self.duration = duration
         
-        self.tree = tree
-        self.write()
+        if tree != None:
+            self.tree = tree
+            self.write()
         #print ("Song:", id, name, songurl, artist, artistid, album, albumid, explicit, discno, trackno, duration)
     
     def write(self):
+        """Write this object to the cache file as XML
+        """
         new = ET.Element('song')
         
         newid           = ET.SubElement(new, 'id')
@@ -135,7 +206,22 @@ class Song:
         
         self.tree.getroot()[0].append(new)
         self.tree.write("data/cache.xml")
-        
+    
+    def read(element):
+        """Read this object from an Element object
+        """
+        id           = element.find('id').text
+        name         = element.find('name').text
+        songurl      = element.find('songurl').text
+        artist       = element.find('artist').text
+        artistid     = element.find('artistid').text
+        album        = element.find('album').text
+        albumid      = element.find('albumid').text
+        explicit     = element.find('explicit').text
+        discno       = element.find('discno').text
+        trackno      = element.find('trackno').text
+        duration     = element.find('duration').text
+        return Song(None, id, name, songurl, artist, artistid, album, albumid, explicit, discno, trackno, duration)
         
 class Artist: 
     def __init__(self, tree, id, name, artisturl, imageurl):
@@ -144,11 +230,14 @@ class Artist:
         self.artisturl = artisturl
         self.imageurl = imageurl
         
-        self.tree = tree
-        self.write()
+        if tree != None:
+            self.tree = tree
+            self.write()
         #print ("Artist:", id, name, artisturl, imageurl)
     
     def write(self):
+        """Write this object to the cache file as XML
+        """
         new = ET.Element('artist')
         
         newid        = ET.SubElement(new, 'id')
@@ -163,7 +252,15 @@ class Artist:
         
         self.tree.getroot()[1].append(new)
         self.tree.write("data/cache.xml")
-        
+    
+    def read(element):
+        """Read this object from an Element object
+        """
+        id        = element.find('id').text
+        name      = element.find('name').text
+        artisturl = element.find('artisturl').text
+        imageurl  = element.find('imageurl').text
+        return Artist(None, id, name, artisturl, imageurl)
         
 class Album: 
     def __init__(self, tree, id, name, artist, artistid, albumurl, imageurl, tracks, totaltracks, duration):
@@ -177,11 +274,14 @@ class Album:
         self.totaltracks = totaltracks
         self.duration = duration
         
-        self.tree = tree
-        self.write()
+        if tree != None:
+            self.tree = tree
+            self.write()
         #print ("Album:", id, name, artist, artistid, albumurl, imageurl, tracks, totaltracks, duration)
     
     def write(self):
+        """Write this object to the cache file as XML
+        """
         new = ET.Element('album')
         
         newid           = ET.SubElement(new, 'id')
@@ -207,13 +307,38 @@ class Album:
         
         self.tree.getroot()[2].append(new)
         self.tree.write("data/cache.xml")
-        
+
+    def read(element):
+        """Read this object from an element object
+        """
+        id           = element.find('id').text
+        name         = element.find('name').text
+        artist       = element.find('artist').text
+        artistid     = element.find('artistid').text
+        albumurl     = element.find('albumurl').text
+        imageurl     = element.find('imageurl').text
+        tracks       = element.find('tracks').text
+        totaltracks  = element.find('totaltracks').text
+        duration     = element.find('duration').text
+        return Album(None, id, name, artist, artistid, albumurl, imageurl, tracks, totaltracks, duration)
         
 def test():
-    sc = StatifyCache()
-    #print(sc.exists("2ELcuwXrtMA8ect9cGTYnQ", "song")
-    #sc.add("2ELcuwXrtMA8ect9cGTYnQ","2Dr744zaEbNqmW9jxw4gfq","2PqYzY7wdgq0ydlC3nR4ei")
-    #print(sc.exists("2Dr744zaEbNqmW9jxw4gfq", "any"))
-    #print(sc.exists("2Dr744zaEbNqsjxw4gfq", "any"))
+    """Used to test cache changes.
+    """
+    pass
+    #sc = StatifyCache()
+    #print(sc.existsID("2ELcuwXrtMA8ect9cGTYnQ", "song"))
+    #print(sc.existsID("2Dr744zaEbNqmW9jxw4gfq", "any"))
+    #print(sc.existsID("2Dr744zaEbNqsjxw4gfq", "any"))
     #print(sc.get("2PqYzY7wdgq0ydlC3nR4ei").find('name').text)
+    #result = sc.add(sc.search("Lunar Liftoff", "Adam Young"), "song")
+    #result = sc.get(sc.search("Lunar Liftoff", "Adam Young"))
+    #result2 = sc.add(result.find('albumid').text, "album")
+    #print(result2)
+    #print(sc.existsSong("Lunar Liftoff", "Adam Young"))
+    #print(sc.existsID("3dRfiJ2650SZu6GbydcHNb", "artist"))
+    #print(sc.getName("Adam Young","artist").artisturl)
     
+    
+    
+test()

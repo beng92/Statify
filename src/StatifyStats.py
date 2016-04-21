@@ -27,7 +27,7 @@ http://effbot.org/zone/wcklib-calendar.htm
 http://svn.python.org/projects/sandbox/trunk/ttk-gsoc/samples/ttkcalendar.py
 '''
 
-import time, datetime, spotipy
+import time, datetime, spotipy, StatifyCache, logging
 
 # Songs read in order (date, artist, title)
 
@@ -37,7 +37,28 @@ class StatifyStats:
         self.allItems = []
         self.firstdate = None
         self.enddate = None
+        logging.basicConfig(filename="debug.log", level=logging.DEBUG, format='%(asctime)s %(levelname)s > %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
+        
         self.spotify = spotipy.Spotify()
+        self.sc = StatifyCache.StatifyCache()
+        self.cache()
+        
+    def cache(self):
+        logging.info("Cache initiated")
+        for (date, artist, title) in list(set(self.allSongs)):
+            if not self.sc.existsSong(title, artist):
+                songid = self.sc.search(title, artist)
+                if songid != None:
+                    result = self.sc.add(songid, "song")
+                    logging.debug("Adding songid to cache: " + str(songid))
+                    if result != None and not self.sc.existsID(result.artistid, "artist"):
+                        self.sc.add(result.artistid, "artist")
+                        logging.debug("Added artistid to cache: " + result.artistid)
+                    if result != None and not self.sc.existsID(result.albumid, "album"):
+                        self.sc.add(result.albumid, "album")
+                        logging.debug("Adding albumid to cache: " + result.albumid)
+                
+    
     
     def most_common(self, list):
         d = {}
@@ -59,10 +80,9 @@ class StatifyStats:
         
     def most_common_artist_link(self, artist):
         try:
-            searchResult = self.spotify.search(q="artist:" + artist, limit=1,type='track')
-            url = str(searchResult['tracks']['items'][0]['artists'][0]['external_urls']['spotify'])
-            return url
+            return self.sc.getName(artist, "artist").artisturl
         except: 
+            logging.warning("Could not get most common artist link")
             return None
         
     def most_common_song_plays(self, list):
@@ -70,10 +90,9 @@ class StatifyStats:
         
     def most_common_song_link(self, song):
         try:
-            searchResult = self.spotify.search(q="artist:" + song[0] + " track:" + song[1], limit=1,type='track')
-            url = str(searchResult['tracks']['items'][0]['external_urls']['spotify'])
-            return url
+            return self.sc.getName(song, "song").songurl
         except: 
+            logging.warning("Could not get most common song link")
             return None
     
     def listening_time(self, list): # Expecting self.allItems in form (d,s)
@@ -116,6 +135,7 @@ class StatifyStats:
         if start != None and end != None:
             self.allSongs = [(d,a,t) for d,a,t in self.allSongs if d >= start and d <= end]
             self.allItems = [(d,s) for d,s in self.allItems if d >= start and d <= end]
+
         return "Loaded songs."
 
         
@@ -130,7 +150,7 @@ class StatifyStats:
         return (" - ".join(results[0]) + " (" + str(results[1]) + ")", self.most_common_song_link(results[0]))
     def mcArtist(self):
         results = self.most_common_artist_plays(self.allSongs)
-        return (results[0] + " (" + str(results[1]) + ")", self.most_common_artist_link(results[0]))
+        return (results[0] + " (" + str(results[1]) + ")", self.most_common_artist_link(results[0][1]))
     def listenTime(self):
         result = self.listening_time(self.allItems)
         days = int(result.days)
