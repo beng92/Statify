@@ -126,7 +126,6 @@ class StatifyCache:
         if type == "song":
             for track in self.allSongs.findall('song'):
                 if track.find('name').text == name:
-                    ET.dump(track)
                     return Song.read(track)
         if type == "artist":
             for artist in self.allArtists.findall('artist'):

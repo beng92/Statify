@@ -18,7 +18,6 @@ class StatifyGUI:
         mainFrame = Frame(root)
         bottomFrame = Frame(root)
         
-
         ss.load(None, None)
         logging.info("Loaded songs")
         global startdate, enddate, labels

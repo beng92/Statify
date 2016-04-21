@@ -160,12 +160,12 @@ class StatifyStats:
         """Returns the most common song, with a link to the Spotify page.
         """
         results = self.most_common_song_plays(self.allSongs)
-        return (" - ".join(results[0]) + " (" + str(results[1]) + ")", self.most_common_song_link(results[0]))
+        return (" - ".join(results[0]) + " (" + str(results[1]) + ")", self.most_common_song_link(results[0][1]))
     def mcArtist(self):
         """Returns the most common artist, with a link to the Spotify page.
         """
         results = self.most_common_artist_plays(self.allSongs)
-        return (results[0] + " (" + str(results[1]) + ")", self.most_common_artist_link(results[0][1]))
+        return (results[0] + " (" + str(results[1]) + ")", self.most_common_artist_link(results[0]))
     def listenTime(self):
         """Returns the total listening time for the currently selected range.
         """
