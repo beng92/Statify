@@ -27,7 +27,8 @@ http://effbot.org/zone/wcklib-calendar.htm
 http://svn.python.org/projects/sandbox/trunk/ttk-gsoc/samples/ttkcalendar.py
 '''
 
-import time, datetime, spotipy, StatifyCache, logging
+import time, datetime, StatifyCache, logging
+import libs.spotipy as spotipy
 
 # Songs read in order (date, artist, title)
 
