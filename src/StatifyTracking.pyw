@@ -1,6 +1,8 @@
 import win32gui, time, os
 
 track = win32gui.GetWindowText(win32gui.FindWindow('SpotifyMainWindow', None))
+if not os.path.exists('data'):
+    os.makedirs('data')
 file = open('data/data.txt', 'a')
 file.write(time.ctime() + ">" + track + '\n')
 file.flush()
