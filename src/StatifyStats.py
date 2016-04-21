@@ -39,6 +39,7 @@ class StatifyStats:
         self.firstdate = None
         self.enddate = None
         logging.basicConfig(filename="debug.log", level=logging.DEBUG, format='%(asctime)s %(levelname)s > %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
+        self.length = 0
         
         self.spotify = spotipy.Spotify()
         self.sc = StatifyCache.StatifyCache()
@@ -118,7 +119,11 @@ class StatifyStats:
         file = open("data/data.txt")
         lines = file.read().splitlines()
         file.close()
-
+        ret = len(lines) > self.length
+        self.length = len(lines)
+        
+        
+        
         self.allSongs = []
         self.allItems = []
         self.firstdate = None
@@ -137,11 +142,12 @@ class StatifyStats:
                 self.allSongs.append((date, artistName, songName))
             if song != "":
                 self.allItems.append((date,song))
+        
         if start != None and end != None:
             self.allSongs = [(d,a,t) for d,a,t in self.allSongs if d >= start and d <= end]
             self.allItems = [(d,s) for d,s in self.allItems if d >= start and d <= end]
 
-        return "Loaded songs."
+        return ret
 
         
     def plays(self):

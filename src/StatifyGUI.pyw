@@ -19,6 +19,7 @@ class StatifyGUI:
         bottomFrame = Frame(root)
         
         ss.load(None, None)
+        ss.cache()
         logging.info("Loaded songs")
         global startdate, enddate, labels
         startdate = ss.firstdate
@@ -59,9 +60,11 @@ class StatifyGUI:
         def reload(): 
             """Reload data and stats.
             """
-            ss.load(startdate, enddate)
-            ss.cache()
             logging.info("Reloading")
+            if ss.load(startdate, enddate):
+                logging.info("Recacheing")
+                ss.cache()
+                
             
             for child in mainFrame.winfo_children():
                 child.destroy()
