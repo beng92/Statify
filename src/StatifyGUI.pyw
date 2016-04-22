@@ -10,7 +10,7 @@ class StatifyGUI:
         root = Tk()
         root.wm_title("Statify")
         root.iconbitmap('icons/statify.ico')
-        logging.basicConfig(filename="debug.log", level=logging.DEBUG, format='%(asctime)s %(levelname)s > %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
+        logging.basicConfig(filename="debug.log", filemode='w', level=logging.DEBUG, format='%(asctime)s %(levelname)s > %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
         ss = StatifyStats()
         
         
@@ -19,7 +19,6 @@ class StatifyGUI:
         bottomFrame = Frame(root)
         
         ss.load(None, None)
-        ss.cache()
         logging.info("Loaded songs")
         global startdate, enddate, labels
         startdate = ss.firstdate
@@ -61,9 +60,7 @@ class StatifyGUI:
             """Reload data and stats.
             """
             logging.info("Reloading")
-            if ss.load(startdate, enddate):
-                logging.info("Recacheing")
-                ss.cache()
+            ss.load(startdate, enddate)
                 
             
             for child in mainFrame.winfo_children():

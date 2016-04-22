@@ -28,9 +28,8 @@ http://svn.python.org/projects/sandbox/trunk/ttk-gsoc/samples/ttkcalendar.py
 '''
 
 import time, datetime, StatifyCache, logging
-import libs.spotipy as spotipy
 
-# Songs read in order (date, artist, title)
+# Songs read in order (date, Song)
 
 class StatifyStats:
     def __init__(self):
@@ -38,32 +37,11 @@ class StatifyStats:
         self.allItems = []
         self.firstdate = None
         self.enddate = None
-        logging.basicConfig(filename="debug.log", level=logging.DEBUG, format='%(asctime)s %(levelname)s > %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
+        logging.basicConfig(filename="debug.log", filemode='w', level=logging.DEBUG, format='%(asctime)s %(levelname)s > %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
         self.length = 0
         
-        self.spotify = spotipy.Spotify()
         self.sc = StatifyCache.StatifyCache()
-        self.cache()
-        
-    def cache(self):
-        """Re-cache's the new list. Called on reload.
-        """
-        logging.info("Cache initiated")
-        for (date, artist, title) in list(set(self.allSongs)):
-            if not self.sc.existsSong(title, artist):
-                songid = self.sc.search(title, artist)
-                if songid != None:
-                    result = self.sc.add(songid, "song")
-                    logging.debug("Adding songid to cache: " + str(songid))
-                    if result != None and not self.sc.existsID(result.artistid, "artist"):
-                        self.sc.add(result.artistid, "artist")
-                        logging.debug("Added artistid to cache: " + result.artistid)
-                    if result != None and not self.sc.existsID(result.albumid, "album"):
-                        self.sc.add(result.albumid, "album")
-                        logging.debug("Adding albumid to cache: " + result.albumid)
-                
-    
-    
+
     def most_common(self, list):
         d = {}
         for item in list:
@@ -80,24 +58,16 @@ class StatifyStats:
         return (name,max)
     
     def most_common_artist_plays(self, list):
-        return self.most_common([a for d,a,t in list])
+        return self.most_common([s.artist for d,s in list])
         
     def most_common_artist_link(self, artist):
-        try:
-            return self.sc.getName(artist, "artist").artisturl
-        except: 
-            logging.warning("Could not get most common artist link")
-            return None
+        return self.sc.getName(artist, "artist").artisturl
         
     def most_common_song_plays(self, list):
-        return self.most_common([(a,t) for d,a,t in list])
+        return self.most_common([s.name for d,s in list])
         
     def most_common_song_link(self, song):
-        try:
-            return self.sc.getName(song, "song").songurl
-        except: 
-            logging.warning("Could not get most common song link")
-            return None
+        return self.sc.getName(song, "song").songurl
     
     def listening_time(self, list): # Expecting self.allItems in form (d,s)
         timer = datetime.timedelta()
@@ -124,7 +94,6 @@ class StatifyStats:
         
         
         
-        self.allSongs = []
         self.allItems = []
         self.firstdate = None
 
@@ -136,16 +105,28 @@ class StatifyStats:
             self.enddate = date
             song = line.split('>',1)[1]
             index = lines.index(line)
-            if song != "Spotify" and song != "" and index+2 < len(lines) and not (lines[index+1].split(">",1)[1] == "Spotify" and lines[index+2].split(">",1)[1] == song):
+            if song != "Spotify" and song != "":
                 artistName = song.split(" - ",1)[0]
                 songName = song.split(" - ",1)[1]
-                self.allSongs.append((date, artistName, songName))
-            if song != "":
-                self.allItems.append((date,song))
-        
+                songObj = self.sc.getSong(songName, artistName)
+
+                self.allItems.append((date, songObj))
+            elif song == "Spotify":
+                    self.allItems.append((date,"Spotify"))
+                    
         if start != None and end != None:
-            self.allSongs = [(d,a,t) for d,a,t in self.allSongs if d >= start and d <= end]
             self.allItems = [(d,s) for d,s in self.allItems if d >= start and d <= end]
+        
+        previous = ""
+        self.allSongs = [(d,s) for d,s in self.allItems if not isinstance(s, str)]
+        for item in self.allSongs:
+            date, song = item
+            #remove consecutive appearances
+            if song == previous:
+                self.allSongs.delete(item)
+            previous = song
+                
+        
 
         return ret
 
@@ -157,21 +138,22 @@ class StatifyStats:
     def artists(self):
         """Return number of artists in the currently loaded list
         """
-        return str(len(set([a for d,a,t in self.allSongs])))
+        return str(len(set([s.artist for d,s in self.allSongs])))
     def uniquePlays(self):
         """Return the number of songs in the currently loaded list
         """
-        return str(len(set([(a,t) for d,a,t in self.allSongs])))
+        return str(len(set([s.name for d,s in self.allSongs])))
     def mcSong(self):
         """Returns the most common song, with a link to the Spotify page.
         """
-        results = self.most_common_song_plays(self.allSongs)
-        return (" - ".join(results[0]) + " (" + str(results[1]) + ")", self.most_common_song_link(results[0][1]))
+        name, max = self.most_common_song_plays(self.allSongs)
+        song = self.sc.getName(name, "song")
+        return (name + " - " + song.artist + " (" + str(max) + ")", self.most_common_song_link(name))
     def mcArtist(self):
         """Returns the most common artist, with a link to the Spotify page.
         """
-        results = self.most_common_artist_plays(self.allSongs)
-        return (results[0] + " (" + str(results[1]) + ")", self.most_common_artist_link(results[0]))
+        artist, max = self.most_common_artist_plays(self.allSongs)
+        return (artist + " (" + str(max) + ")", self.most_common_artist_link(artist))
     def listenTime(self):
         """Returns the total listening time for the currently selected range.
         """

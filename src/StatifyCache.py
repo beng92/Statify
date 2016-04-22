@@ -7,7 +7,7 @@ import os.path
 class StatifyCache:
     def __init__(self):
         self.spotipy = spotipy.Spotify()
-        logging.basicConfig(filename="debug.log", level=logging.DEBUG, format='%(asctime)s %(levelname)s > %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
+        logging.basicConfig(filename="debug.log", filemode='w', level=logging.DEBUG, format='%(asctime)s %(levelname)s > %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
         
         try:
             self.tree = ET.parse("data/cache.xml")
@@ -41,7 +41,11 @@ class StatifyCache:
             return self._addAlbum(id)
     
     def _addSong(self, id):
-        result = self.spotipy.track(id)
+        try:
+            result = self.spotipy.track(id)
+        except:
+            logging.error("Could not connect to Spotify API")
+            return 
         name     = result['name']
         songurl  = result['external_urls']['spotify']
         artist   = result['artists'][0]['name']
@@ -55,14 +59,22 @@ class StatifyCache:
         return Song(self.tree, id, name, songurl, artist, artistid, album, albumid, explicit, discno, trackno, duration)
     
     def _addArtist(self, id):
-        result = self.spotipy.artist(id)
+        try:
+            result = self.spotipy.artist(id)
+        except:
+            logging.error("Could not connect to Spotify API")
+            return 
         name      = result['name']
         artisturl = result['external_urls']['spotify']
         imageurl  = result['images'][0]['url']
         return Artist(self.tree, id, name, artisturl, imageurl)
         
     def _addAlbum(self, id):
-        result = self.spotipy.album(id)
+        try:
+            result = self.spotipy.album(id)
+        except:
+            logging.error("Could not connect to Spotify API")
+            return 
         name        = result['name']
         artist      = result['artists'][0]['name']
         artistid    = result['artists'][0]['id']
@@ -137,19 +149,53 @@ class StatifyCache:
                 if album.find('name').text == name:
                     return Album.read(album)
         return None
-            
+        
+    def getSong(self, name, artist):
+        """Similar to getName but only for songs, with the artist field included.
+        Will search and create a song if not 
+        Returns Song object
+        """
+        for track in self.allSongs.findall('song'):
+            if track.find('name').text == name and track.find('artist').text == artist:
+                return Song.read(track)
+        # Song not cached. Possibly un-cacheable. Try again or log error.
+        uncacheable = open("data/uncacheable.txt",'r')
+        uncached = uncacheable.read().splitlines()
+        uncacheable.close()
+        if (name + " - " + artist) in uncached:
+            return Song(None, None, name, None, artist, None, None, None, None, None, None, None)
+        else: 
+            id = self.search(name, artist)
+            if id != None:
+                song = self.add(id, "song")
+                if song != None:
+                    return song
+            logging.warning("Uncacheable song: " + name + " - " + artist)
+            file = open("data/uncacheable.txt",'a')
+            file.write(name + " - " + artist + "\n")
+            file.close()
+            return Song(None, None, name, None, artist, None, None, None, None, None, None, None)
+        
     def search(self, song, artist):
         """Sends a search string to Spotify's servers to return an ID
         Artist must not be None, song can be None
         """
         if song != None and artist != None:
-            result = self.spotipy.search(q="artist:" + artist + " track:" + song, limit=1, type='track')
+            try:
+                result = self.spotipy.search(q="artist:" + artist + " track:" + song, limit=1, type='track')
+            except:
+                logging.error("Could not connect to Spotify API")
+                return 
             if len(result['tracks']['items']) > 0:
                 return result['tracks']['items'][0]['id']
             else:
                 return None
         elif song == None and artist != None:
-            result = self.spotipy.search(q="artist:" + artist, limit=1, type='artist')
+            try:
+                result = self.spotipy.search(q="artist:" + artist, limit=1, type='artist')
+            except:
+                logging.error("Could not connect to Spotify API")
+                return 
             if len(result['artists']['items']) > 0:
                 return result['artists']['items'][0]['id']
             else:
@@ -173,6 +219,11 @@ class Song:
             self.tree = tree
             self.write()
         #print ("Song:", id, name, songurl, artist, artistid, album, albumid, explicit, discno, trackno, duration)
+    
+    def __str__(self):
+        return str(self.id) + " (" + self.name + " - " + self.artist + ")"
+    def __repr__(self):
+        return self.__str__()
     
     def write(self):
         """Write this object to the cache file as XML
@@ -235,6 +286,11 @@ class Artist:
             self.write()
         #print ("Artist:", id, name, artisturl, imageurl)
     
+    def __str__(self):
+        return self.id + " (" + self.name + ")"
+    def __repr__(self):
+        return self.__str__()
+        
     def write(self):
         """Write this object to the cache file as XML
         """
@@ -279,6 +335,11 @@ class Album:
             self.write()
         #print ("Album:", id, name, artist, artistid, albumurl, imageurl, tracks, totaltracks, duration)
     
+    def __str__(self):
+        return self.id + " (" + self.name + " - " + self.artist + ")"
+    def __repr__(self):
+        return self.__str__()
+        
     def write(self):
         """Write this object to the cache file as XML
         """
