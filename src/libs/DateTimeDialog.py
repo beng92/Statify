@@ -34,7 +34,7 @@ class DateTimeDialog(tkSimpleDialog.Dialog):
             hours = int(self.spinboxH.get()) if int(self.spinboxH.get()) < 24 and int(self.spinboxH.get()) >= 0 else 0
             minutes = int(self.spinboxM.get()) if int(self.spinboxM.get()) < 60 and int(self.spinboxM.get()) >= 0 else 0
             seconds = int(self.spinboxS.get()) if int(self.spinboxS.get()) < 60 and int(self.spinboxS.get()) >= 0 else 0
-            self.result = self.datetime(self.calendar.selection.year, self.calendar.selection.month, self.calendar.selection.day, )
+            self.result = self.datetime(self.calendar.selection.year, self.calendar.selection.month, self.calendar.selection.day, hours, minutes, seconds)
      
     def settoday(self):
         self.datetime = calendar.datetime.datetime
