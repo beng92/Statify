@@ -61,13 +61,15 @@ class StatifyStats:
         return self.most_common([s.artist for d,s in list])
         
     def most_common_artist_link(self, artist):
-        return self.sc.getName(artist, "artist").artisturl
+        song = self.sc.getName(artist, "artist")
+        return song.artisturl if song != None else None
         
     def most_common_song_plays(self, list):
         return self.most_common([s.name for d,s in list])
         
     def most_common_song_link(self, song):
-        return self.sc.getName(song, "song").songurl
+        song = self.sc.getName(song, "song")
+        return song.songurl if song != None else None
     
     def listening_time(self, list): # Expecting self.allItems in form (d,s)
         timer = datetime.timedelta()
@@ -82,6 +84,13 @@ class StatifyStats:
         if start != None:
             timer = timer + (datetime.datetime.now() - start)
         return timer
+        
+        
+    def daysInRange(self, list):
+        startDate = list[0][0]
+        endDate = list[len(list)-1][0]
+        return (startDate - endDate).days
+        
                 
     def load(self, start, end):
         """Loads the data.txt file created by StatifyTracking.pyw
@@ -143,6 +152,10 @@ class StatifyStats:
         """Return the number of songs in the currently loaded list
         """
         return str(len(set([s.name for d,s in self.allSongs])))
+    def playsPerDay(self):
+        """Return the number of songs in the currently loaded list
+        """
+        return abs(int(len(self.allSongs) / self.daysInRange(self.allSongs)))
     def mcSong(self):
         """Returns the most common song, with a link to the Spotify page.
         """

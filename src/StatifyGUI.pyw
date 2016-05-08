@@ -67,37 +67,43 @@ class StatifyGUI:
                 child.destroy()
                 
             row = 0
-            l1 = Label(mainFrame,text="1. Plays")
+            l1 = Label(mainFrame,text="Plays")
             r1 = Label(mainFrame,text=ss.plays())
             l1.grid(column=0, row=row, sticky=W)
             r1.grid(column=1, row=row, sticky=W)
             row += 1
             
-            l2 = Label(mainFrame,text="2. Unique Songs")
+            l2 = Label(mainFrame,text="Unique Songs")
             r2 = Label(mainFrame,text=ss.uniquePlays())
             l2.grid(column=0, row=row, sticky=W)
             r2.grid(column=1, row=row, sticky=W)
             row += 1
             
-            l3 = Label(mainFrame,text="3. Artists")
+            l3 = Label(mainFrame,text="Artists")
             r3 = Label(mainFrame,text=ss.artists())
             l3.grid(column=0, row=row, sticky=W)
             r3.grid(column=1, row=row, sticky=W)
             row += 1
             
-            l4 = Label(mainFrame,text="4. Most Common Track")
+            l2 = Label(mainFrame,text="Average songs per day")
+            r2 = Label(mainFrame,text=ss.playsPerDay())
+            l2.grid(column=0, row=row, sticky=W)
+            r2.grid(column=1, row=row, sticky=W)
+            row += 1
+            
+            l4 = Label(mainFrame,text="Most Common Track")
             r4 = Button(mainFrame, text=ss.mcSong()[0], fg="blue", cursor="hand2", command=lambda: webbrowser.open_new(ss.mcSong()[1]))
             l4.grid(column=0, row=row, sticky=W)
             r4.grid(column=1, row=row, sticky=W)
             row += 1
             
-            l5 = Label(mainFrame,text="5. Most Common Artist")
+            l5 = Label(mainFrame,text="Most Common Artist")
             r5 = Button(mainFrame, text=ss.mcArtist()[0], fg="blue", cursor="hand2", command=lambda: webbrowser.open_new(ss.mcArtist()[1]))
             l5.grid(column=0, row=row, sticky=W)
             r5.grid(column=1, row=row, sticky=W)
             row += 1
             
-            l6 = Label(mainFrame,text="6. Listening Time")
+            l6 = Label(mainFrame,text="Listening Time")
             r6 = Label(mainFrame,text=ss.listenTime())
             l6.grid(column=0, row=row, sticky=W)
             r6.grid(column=1, row=row, sticky=W)
